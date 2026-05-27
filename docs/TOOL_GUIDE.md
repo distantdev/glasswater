@@ -1,0 +1,140 @@
+# glasswater Tool Guide
+
+This guide explains what `glasswater` does, how to install it, and how to use it effectively in day-to-day terminal work.
+
+## What glasswater does
+
+`glasswater` adds inline command suggestions to PowerShell using a local LLM running in Ollama.
+
+- If you type part of a command, it suggests the rest inline.
+- If you type plain English, it suggests a command you can run.
+- Suggestions stay local to your machine because generation is done by your local Ollama instance.
+
+The experience is designed to feel native with PSReadLine ghost text.
+
+## How it works in practice
+
+When enabled, `glasswater` uses two suggestion sources:
+
+1. **History first**: if your current text matches recent commands, PSReadLine history suggestions appear immediately.
+2. **Local LLM fallback**: for new commands, mid-line edits, or natural language text, `glasswater` calls Ollama and returns a suggestion.
+
+`glasswater` debounces input (default 250 ms) and cancels stale in-flight requests to keep typing responsive.
+
+## Requirements
+
+- PowerShell 7.4 or newer
+- PSReadLine 2.2.2 or newer
+- Ollama installed and running locally
+- Model: `qwen2.5-coder:1.5b-base`
+
+## Install and first run
+
+Install from PSGallery:
+
+```powershell
+Install-Module glasswater -AllowPrerelease -Scope CurrentUser
+Import-Module glasswater
+Initialize-Glasswater
+```
+
+Pull the model once:
+
+```powershell
+$root = Split-Path (Get-Module glasswater).Path
+& "$root\scripts\Install-OllamaModel.ps1"
+```
+
+Optional performance tweak:
+
+```powershell
+$env:OLLAMA_KEEP_ALIVE = "-1"
+```
+
+## Core usage patterns
+
+### 1) Partial command completion
+
+Type:
+
+```powershell
+Get-Child
+```
+
+Pause briefly. You should see inline completion.
+
+### 2) Mid-line completion
+
+Type part of a pipeline and place cursor in the middle. `glasswater` can fill the missing expression.
+
+### 3) Natural language to command
+
+Type a plain English instruction such as:
+
+```text
+list all files in the dir
+```
+
+Pause, then press Right Arrow to accept the generated command replacement.
+
+## Initialization options
+
+`Initialize-Glasswater` supports these options:
+
+- `-OllamaEndpoint` (default `http://127.0.0.1:11434`)
+- `-Model` (default `qwen2.5-coder:1.5b-base`)
+- `-DebounceMs` (default `250`)
+- `-RequestTimeoutMs` (default `5000`)
+- `-DisableNaturalLanguage`
+- `-PluginOnly`
+- `-SkipPsReadLineSetup`
+
+Examples:
+
+```powershell
+Initialize-Glasswater -DebounceMs 150 -RequestTimeoutMs 3000
+Initialize-Glasswater -Model "qwen2.5-coder:7b"
+Initialize-Glasswater -DisableNaturalLanguage
+```
+
+## Load automatically in every shell
+
+Add to your PowerShell profile:
+
+```powershell
+Import-Module glasswater
+Initialize-Glasswater
+```
+
+Open profile quickly:
+
+```powershell
+code $PROFILE
+```
+
+## Troubleshooting
+
+### No suggestions appear
+
+- Check module loaded: `Get-Module glasswater`
+- Check predictor options: `Get-PSReadLineOption`
+- Re-run init: `Initialize-Glasswater`
+
+### Natural language does not replace line
+
+- Ensure natural language is enabled (do not use `-DisableNaturalLanguage`)
+- Press Right Arrow to accept replacement
+- Re-run init to reapply keybinding
+
+### Ollama errors or timeouts
+
+- Verify server: `Invoke-RestMethod http://127.0.0.1:11434/api/tags`
+- Ensure model exists: `ollama list`
+- Increase timeout: `Initialize-Glasswater -RequestTimeoutMs 10000`
+
+## Maintainer notes
+
+For packaging and release flow, see:
+
+- `README.md` (quick publish steps)
+- `SPEC.md` (architecture and verification details)

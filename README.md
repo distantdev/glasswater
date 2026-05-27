@@ -4,6 +4,10 @@ Inline ghost-text completions for PowerShell, powered by local [Ollama](https://
 
 Type a partial command, pause for about a quarter second, and a gray suggestion appears inline. Accept it with the Right Arrow (same as native PSReadLine suggestions). History matches use PSReadLine's built-in history; everything else uses your local Ollama model.
 
+![glasswater inline ghost-text completions in PowerShell](docs/glasswater_example.gif)
+
+Detailed user docs: [Tool Guide](docs/TOOL_GUIDE.md).
+
 ## Requirements
 
 - PowerShell 7.4+
