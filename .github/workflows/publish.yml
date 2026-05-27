@@ -1,0 +1,96 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Setup PowerShell
+        uses: pwsh/setup-pwsh@v1
+        with:
+          pwsh-version: '7.4'
+
+      - name: Stage module
+        shell: pwsh
+        run: ./Publish-Glasswater.ps1 -Configuration Release
+
+      - name: Upload staged module
+        uses: actions/upload-artifact@v4
+        with:
+          name: glasswater-module
+          path: publish/glasswater/
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: pwsh/setup-pwsh@v1
+        with:
+          pwsh-version: '7.4'
+
+      - name: Download staged module
+        uses: actions/download-artifact@v4
+        with:
+          name: glasswater-module
+          path: publish/glasswater
+
+      - name: Validate tag matches manifest version
+        shell: pwsh
+        run: |
+          $manifestPath = './publish/glasswater/glasswater.psd1'
+          $data = Import-PowerShellDataFile -Path $manifestPath
+          $manifestVersion = [string]$data.ModuleVersion
+          if ($data.PrivateData.PSData.Prerelease) {
+            $manifestVersion = "$manifestVersion-$($data.PrivateData.PSData.Prerelease)"
+          }
+
+          $tagVersion = '${{ github.ref_name }}'.TrimStart('v')
+          if ($manifestVersion -ne $tagVersion) {
+            throw "Tag version '$tagVersion' does not match manifest version '$manifestVersion'."
+          }
+
+          Write-Host "Version OK: $manifestVersion"
+
+      - name: Install PowerShellGet
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module PowerShellGet -MinimumVersion 2.2.5 -Force -Scope CurrentUser -AllowClobber
+
+      - name: Publish to PSGallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:PSGALLERY_API_KEY)) {
+            throw 'PSGALLERY_API_KEY secret is not configured on this repository.'
+          }
+          Publish-Module -Path './publish/glasswater' -Repository PSGallery -NuGetApiKey $env:PSGALLERY_API_KEY -Force -Verbose

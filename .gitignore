@@ -1,0 +1,4 @@
+artifacts/
+publish/
+src/**/bin/
+src/**/obj/
