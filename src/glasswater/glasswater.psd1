@@ -25,7 +25,7 @@
             LicenseUri               = 'https://github.com/distantdev/glasswater/blob/main/LICENSE'
             ProjectUri               = 'https://github.com/distantdev/glasswater'
             ReleaseNotes             = 'Initial prerelease: inline ghost text via Ollama FIM and PSReadLine plugin.'
-            Prerelease               = 'preview1'
+            Prerelease               = 'preview2'
             RequireLicenseAcceptance = $false
         }
     }
