@@ -126,7 +126,7 @@ public sealed class OllamaClient : IDisposable
             }
         }
 
-        text = text.Trim().Trim('`', '"', '\'');
+        text = StripOuterWrapping(text);
         if (text.StartsWith("Command:", StringComparison.OrdinalIgnoreCase))
         {
             text = text["Command:".Length..].Trim();
@@ -139,6 +139,28 @@ public sealed class OllamaClient : IDisposable
         }
 
         return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    /// <summary>
+    /// Removes one layer of wrapping quotes/backticks only when they enclose the whole command.
+    /// Do not use <see cref="string.Trim(char[])"/> on quotes; valid commands often end in ".
+    /// </summary>
+    internal static string StripOuterWrapping(string text)
+    {
+        text = text.Trim();
+        if (text.Length < 2)
+        {
+            return text;
+        }
+
+        char open = text[0];
+        char close = text[^1];
+        if (open == close && (open == '"' || open == '\'' || open == '`'))
+        {
+            return text[1..^1].Trim();
+        }
+
+        return text;
     }
 
     public static string? SanitizeMiddle(string? raw, string lineSuffix = "")
