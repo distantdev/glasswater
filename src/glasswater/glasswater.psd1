@@ -24,8 +24,8 @@
             Tags                     = @('PSReadLine', 'Completion', 'Ollama', 'AI', 'FIM', 'Prediction')
             LicenseUri               = 'https://github.com/distantdev/glasswater/blob/main/LICENSE'
             ProjectUri               = 'https://github.com/distantdev/glasswater'
-            ReleaseNotes             = 'Initial prerelease: inline ghost text via Ollama FIM and PSReadLine plugin.'
-            Prerelease               = 'preview2'
+            ReleaseNotes             = 'Natural-language command quote sanitization fix; README demo GIF and docs updates.'
+            Prerelease               = 'preview3'
             RequireLicenseAcceptance = $false
         }
     }
