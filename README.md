@@ -1,26 +1,60 @@
 # glasswater
 
-Inline ghost-text completions for PowerShell via Ollama and Qwen2.5-Coder FIM.
+Inline ghost-text completions for PowerShell, powered by local [Ollama](https://ollama.com) and Qwen2.5-Coder FIM.
 
-## Install from PSGallery
+Type a partial command, pause for about a quarter second, and a gray suggestion appears inline. Accept it with the Right Arrow (same as native PSReadLine suggestions). History matches use PSReadLine's built-in history; everything else uses your local Ollama model.
+
+## Requirements
+
+- PowerShell 7.4+
+- PSReadLine 2.2.2+ (installed automatically with `Install-Module`)
+- [Ollama](https://ollama.com) running locally
+- Model: `qwen2.5-coder:1.5b-base`
+
+## Install
 
 ```powershell
 Install-Module glasswater -AllowPrerelease -Scope CurrentUser
 Import-Module glasswater
 Initialize-Glasswater
-
-# One-time Ollama model setup (bundled with the module):
-& (Join-Path (Split-Path (Get-Module glasswater).Path) 'scripts\Install-OllamaModel.ps1')
 ```
 
-## Development quick start
+Pull the model once (script ships inside the module):
+
+```powershell
+$root = Split-Path (Get-Module glasswater).Path
+& "$root\scripts\Install-OllamaModel.ps1"
+```
+
+Optional: keep the model loaded for faster suggestions:
+
+```powershell
+$env:OLLAMA_KEEP_ALIVE = '-1'
+```
+
+## Usage
+
+After `Initialize-Glasswater`, open any PowerShell session and start typing:
+
+- **Command prefix** -- e.g. type `Get-Child` and pause; ghost text completes the cmdlet.
+- **History** -- if you ran a command before, typing its prefix shows the history match (no Ollama wait).
+- **Mid-line edit** -- cursor in the middle of a pipeline; Ollama fills in the gap (FIM).
+- **Natural language** -- e.g. `list all files in the dir`; Right Arrow replaces the line with a generated command.
+
+Run `Initialize-Glasswater` from your `$PROFILE` if you want it in every session.
+
+## Development
+
+Clone the repo, install the Ollama model, and launch a dev session:
 
 ```powershell
 ./Install-OllamaModel.ps1
 ./Start-GlasswaterDev.ps1
 ```
 
-Or build without locking issues (outputs to `artifacts/`, not `bin/`):
+That builds the module and opens a new PowerShell window with glasswater loaded.
+
+To build and load manually:
 
 ```powershell
 ./Build-Glasswater.ps1
@@ -28,49 +62,29 @@ Import-Module ./artifacts/glasswater-dev/glasswater.dll -Force
 Initialize-Glasswater
 ```
 
-## Gallery publish (maintainers)
+See [SPEC.md](SPEC.md) for architecture, parameters, and verification steps.
 
-Stage a gallery-ready module (multi-TFM layout + manifest validation):
+## Publishing (maintainers)
+
+Stage a gallery-ready package:
 
 ```powershell
 ./Publish-Glasswater.ps1
 ```
 
-Optionally refresh `dist/glasswater` for local folder import testing:
+Publish to PSGallery via GitHub Actions:
 
-```powershell
-./Publish-Glasswater.ps1 -UpdateDist
-Import-Module ./dist/glasswater
-```
-
-Push a version tag to trigger GitHub Actions publish (requires `PSGALLERY_API_KEY` repo secret).
-The tag must match `ModuleVersion` plus `PrivateData.PSData.Prerelease` in `src/glasswater/glasswater.psd1`:
+1. Add a `PSGALLERY_API_KEY` secret ([powershellgallery.com](https://www.powershellgallery.com) API key scoped to `glasswater`).
+2. Tag must match `ModuleVersion` + `PrivateData.PSData.Prerelease` in `src/glasswater/glasswater.psd1`:
 
 ```powershell
 git tag v0.1.0-preview1
 git push origin v0.1.0-preview1
 ```
 
-### First-time PSGallery setup
-
-1. Create an account at [powershellgallery.com](https://www.powershellgallery.com).
-2. Profile -> **API Keys** -> create a key scoped to `glasswater`.
-3. GitHub repo **Settings -> Secrets and variables -> Actions** -> add `PSGALLERY_API_KEY`.
-
-Type a partial command, pause briefly (~250ms), and inline ghost text should appear. Prior commands
-use PSReadLine history when the prefix matches; novel mid-line edits and natural-language requests
-use local Ollama (FIM or command generation).
-
-## Requirements
-
-- PowerShell 7.4+ (7.5 / 7.6 use matching .NET TFMs automatically)
-- PSReadLine 2.2.2+
-- [Ollama](https://ollama.com) with `qwen2.5-coder:1.5b-base`
-
-For lower latency, keep the model loaded:
+Local folder import testing:
 
 ```powershell
-$env:OLLAMA_KEEP_ALIVE = '-1'
+./Publish-Glasswater.ps1 -UpdateDist
+Import-Module ./dist/glasswater
 ```
-
-See [SPEC.md](SPEC.md) for architecture and verification details.
