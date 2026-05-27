@@ -72,7 +72,7 @@ Requires PowerShell 7.4+ (module ships net8.0 / net9.0 / net10.0 builds).
 3. **FIM**: `Get-Service | Where-Object { $_.Status -eq ` with cursor before `}`; pause; expect a middle fragment such as `'Running'`.
 4. **Single-line**: Completions must not include newlines.
 5. **Stale cache**: After a pause, change input; old ghost text must not apply.
-6. **Natural language**: Type `list all files in the dir`; pause; expect ` <- ` command hint; Right Arrow replaces the line with the generated command.
+6. **Natural language**: Type `find all open ports`; pause; expect a ` <- ` hint such as `Get-NetTCPConnection -State Established | Where-Object { $_.LocalPort -ne 0 }`; Right Arrow replaces the line with the generated command.
 7. **Ollama down**: Empty suggestion; init may warn if the server is unreachable.
 
 ## Implementation notes

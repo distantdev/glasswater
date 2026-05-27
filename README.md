@@ -70,10 +70,16 @@ Type part of a pipeline and place the cursor in the middle. `glasswater` can fil
 Type a plain English instruction such as:
 
 ```text
-list all files in the dir
+find all open ports
 ```
 
-Pause, then press Right Arrow to accept the generated command replacement.
+Pause briefly. Gray ghost text shows the suggested command after ` <- `, for example:
+
+```powershell
+Get-NetTCPConnection -State Established | Where-Object { $_.LocalPort -ne 0 }
+```
+
+Press Right Arrow to accept the replacement and replace the whole line with that command.
 
 ## Initialization options
 

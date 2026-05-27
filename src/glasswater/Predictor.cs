@@ -87,7 +87,7 @@ public sealed class Predictor : ICommandPredictor, IDisposable
 public sealed class TestGlasswaterNaturalLanguageCmdlet : PSCmdlet
 {
     [Parameter(Mandatory = false, Position = 0)]
-    public string Request { get; set; } = "list all files in the dir";
+    public string Request { get; set; } = "find all open ports";
 
     protected override void ProcessRecord()
     {
