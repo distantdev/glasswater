@@ -5,7 +5,7 @@
     Author            = 'Levi Sluder'
     CompanyName       = 'Distant Nebula'
     Copyright         = '(c) 2026 Distant Nebula. All rights reserved.'
-    Description       = 'Inline ghost-text completions for PSReadLine via local Ollama FIM.'
+    Description       = 'Use natural language in PowerShell with private local-LLM command replacements.'
     PowerShellVersion = '7.4'
     CompatiblePSEditions = @('Core')
 
