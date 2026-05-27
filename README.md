@@ -67,28 +67,3 @@ Initialize-Glasswater
 ```
 
 See [SPEC.md](SPEC.md) for architecture, parameters, and verification steps.
-
-## Publishing (maintainers)
-
-Stage a gallery-ready package:
-
-```powershell
-./Publish-Glasswater.ps1
-```
-
-Publish to PSGallery via GitHub Actions:
-
-1. Add a `PSGALLERY_API_KEY` secret ([powershellgallery.com](https://www.powershellgallery.com) API key scoped to `glasswater`).
-2. Tag must match `ModuleVersion` + `PrivateData.PSData.Prerelease` in `src/glasswater/glasswater.psd1`:
-
-```powershell
-git tag v0.1.0-preview1
-git push origin v0.1.0-preview1
-```
-
-Local folder import testing:
-
-```powershell
-./Publish-Glasswater.ps1 -UpdateDist
-Import-Module ./dist/glasswater
-```
