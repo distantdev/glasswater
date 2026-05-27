@@ -28,10 +28,9 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Setup PowerShell
-        uses: pwsh/setup-pwsh@v1
-        with:
-          pwsh-version: '7.4'
+      - name: Show PowerShell version
+        shell: pwsh
+        run: $PSVersionTable.PSVersion.ToString()
 
       - name: Stage module
         shell: pwsh
@@ -51,10 +50,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PowerShell
-        uses: pwsh/setup-pwsh@v1
-        with:
-          pwsh-version: '7.4'
+      - name: Show PowerShell version
+        shell: pwsh
+        run: $PSVersionTable.PSVersion.ToString()
 
       - name: Download staged module
         uses: actions/download-artifact@v4
